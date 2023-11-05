@@ -19,7 +19,7 @@ def RunStats():
 
         move=0
         while move<MAX_ALLOWED_NUM_OF_MOVES: #Player 2 must win in allowd number of moves
-            if move%2 == FIRST_PLAYER: 
+            if move%2 == 1: 
                 fourConnect.MyopicPlayerAction()
             else:
                 currentState = fourConnect.GetCurrentState()
@@ -42,11 +42,54 @@ def RunStats():
     print(f"Total number of iterations: {NUM_ITERATIONS}")
     print(f"Total percentage of wins: {numOfWins*100/NUM_ITERATIONS}%")
     numLosses = NUM_ITERATIONS - numOfWins
+    if numLosses == 0:
+        numLosses = 1
     print(f"Total percentage of losses due to timeout: {numLossesDueToTimeOut*100/numLosses}%")
         
+def playGames():
+    
+    NUM_ITERATIONS = 100
+    NUM_WINS = 0
+    NUM_LOSSES = 0
+    
+    for i in range(NUM_ITERATIONS):
+        fourConnect = FourConnect()
+        fourConnect.PrintGameState()
+        gameTree = GameTreePlayer()
+        
+        move=0
+        while move<42: #At most 42 moves are possible
+            if move%2 == 0: #Myopic player always moves first
+                fourConnect.MyopicPlayerAction()
+            else:
+                currentState = fourConnect.GetCurrentState()
+                gameTreeAction = gameTree.FindBestAction(currentState)
+                fourConnect.GameTreePlayerAction(gameTreeAction)
+            fourConnect.PrintGameState()
+            move += 1
+            if fourConnect.winner!=None:
+                break
+        
+        """
+        You can add your code here to count the number of wins average number of moves etc.
+        You can modify the PlayGame() function to play multiple games if required.
+        """
+        if fourConnect.winner==1:
+            NUM_LOSSES += 1
+        elif fourConnect.winner==2:
+            NUM_WINS += 1
+    
+    print(f"Game tree depth = {GAME_TREE_DEPTH}")
+    print(f"Total number of iterations: {NUM_ITERATIONS}")
+    print(f"Total percentage of wins: {NUM_WINS*100/NUM_ITERATIONS}%")
+    print(f"Total percentage of losses: {NUM_LOSSES*100/NUM_ITERATIONS}%")
+    NUM_DRAWS = NUM_ITERATIONS - NUM_WINS - NUM_LOSSES
+    print(f"Total percentage of draws: {NUM_DRAWS*100/NUM_ITERATIONS}%")
+            
 
 def main():
-    RunStats()
+    # RunStats()
+    playGames()
 
 if __name__ == "__main__":
     main()

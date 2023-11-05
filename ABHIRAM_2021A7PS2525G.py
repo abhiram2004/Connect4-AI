@@ -3,8 +3,21 @@ from FourConnect import * # See the FourConnect.py file
 import csv
 import math
 import random 
+# import os, sys
+
 
 CSV_FILE = "testcase.csv"
+
+# The total depth of the game tree
+GAME_TREE_DEPTH = 4
+
+# The maximum number of moves allowed for the game tree player
+MAX_ALLOWED_NUM_OF_MOVES = 5
+
+# Which player plays first, 0 - Myopic player starts, 1 - GameTree Player starts
+# FIRST_PLAYER = 1
+
+"Constants used in file, do not change these values"
 
 # What is the value of each piece
 EMPTY = 0
@@ -17,17 +30,8 @@ COLUMN_COUNT = 7
 
 # The size of the window to evaluate
 WINDOW_LENGTH = 4
-
-# The total depth of the game tree
-GAME_TREE_DEPTH = 5
-
-# The maximum number of moves allowed for the game tree player
-MAX_ALLOWED_NUM_OF_MOVES = 40
-
-# Which player plays first, 0 - Myopic player starts, 1 - GameTree Player starts
-FIRST_PLAYER = 0
-
-
+    
+    
 class GameTreePlayer:
     
     def __init__(self):
@@ -146,7 +150,21 @@ class GameTreePlayer:
     # Checks if the game has reached a terminal state
     def isTerminalNode(self, board):
         return self.winning_move(board, MYOPIC_PIECE) or self.winning_move(board, GAMETREE_PIECE) or len(self.getValidLocations(board)) == 0
+    
+    # def myopicPlayerActionWrapper(self, board):
+    #     tempBoard = FourConnect()
+    #     tempBoard.SetCurrentState(board)
         
+    #     # Redirecting output so it doesn't print anything
+    #     old_stdout = sys.stdout # backup current stdout
+    #     sys.stdout = open(os.devnull, "w")
+        
+    #     tempBoard.MyopicPlayerAction()
+        
+    #     sys.stdout = old_stdout # reset old stdout
+    
+    #     return tempBoard.GetCurrentState()
+    
     # Minimax Algorithm in alpha-beta pruning
     def minimax(self, board, depth, alpha, beta, maximizingPlayer):
         valid_locations = self.getValidLocations(board)
@@ -202,6 +220,14 @@ class GameTreePlayer:
                     if alpha >= beta:
                         break
             
+            
+            # b_copy = self.myopicPlayerActionWrapper(board)  
+            # _, new_score = self.minimax(b_copy, depth - 1, alpha, beta, True)
+            # if new_score < value:
+            #     value = new_score
+                
+            # beta = min(beta, value)
+            
             if best_column is None:
                 best_column = random.choice(valid_locations)  # Handle the case when no valid columns are found
 
@@ -222,6 +248,7 @@ class GameTreePlayer:
         # bestAction = int(bestAction)
         # return bestAction
         
+        col = 0
         col, _ = self.minimax(currentState, GAME_TREE_DEPTH, -math.inf, math.inf, True)
         return col
         
@@ -245,7 +272,7 @@ def PlayGame():
     
     move=0
     while move<42: #At most 42 moves are possible
-        if move%2 == FIRST_PLAYER: #Myopic player always moves first
+        if move%2 == 0: #Myopic player always moves first
             fourConnect.MyopicPlayerAction()
         else:
             currentState = fourConnect.GetCurrentState()
@@ -279,8 +306,8 @@ def RunTestCase():
     fourConnect.PrintGameState()
 
     move=0
-    while move<MAX_ALLOWED_NUM_OF_MOVES: #Player 2 must win in allowd number of moves
-        if move%2 == FIRST_PLAYER: 
+    while move<MAX_ALLOWED_NUM_OF_MOVES: #Player 2 must win in allowed number of moves
+        if move%2 == 1: # Assumed that myopic player already made first move 
             fourConnect.MyopicPlayerAction()
         else:
             currentState = fourConnect.GetCurrentState()
