@@ -9,7 +9,7 @@ import random
 CSV_FILE = "testcase.csv"
 
 # The total depth of the game tree
-GAME_TREE_DEPTH = 4
+GAME_TREE_DEPTH = 6
 
 # The maximum number of moves allowed for the game tree player
 MAX_ALLOWED_NUM_OF_MOVES = 5
@@ -30,6 +30,12 @@ COLUMN_COUNT = 7
 
 # The size of the window to evaluate
 WINDOW_LENGTH = 4
+
+# Initialize the column exploration order, starting with center columns
+COLUMN_ORDER = list(range(COLUMN_COUNT))
+for i in range(COLUMN_COUNT):
+    # Initialize the column exploration order, starting with center columns
+    COLUMN_ORDER[i] = COLUMN_COUNT//2 + (1 - 2*(i%2))*(i+1)//2
     
     
 class GameTreePlayer:
@@ -138,11 +144,13 @@ class GameTreePlayer:
                 score += self.evaluateWindow(window, piece)
 
         return score
+    
 
     # Get all the valid locations where a piece can be inserted
     def getValidLocations(self, board):
         valid_locations = []
-        for col in range(COLUMN_COUNT):
+        # Move ordering heuristic
+        for col in COLUMN_ORDER:
             if self.isValidColumn(board, col):
                 valid_locations.append(col)
         return valid_locations
@@ -329,7 +337,7 @@ def RunTestCase():
 
 def main():
     
-    # PlayGame()
+    PlayGame()
     """
     You can modify PlayGame function for writing the report
     Modify the FindBestAction in GameTreePlayer class to implement Game tree search.
@@ -343,7 +351,7 @@ def main():
         See the code for RunTestCase() to understand what is expected.
     """
     
-    RunTestCase()
+    # RunTestCase()
 
 
 if __name__=='__main__':
