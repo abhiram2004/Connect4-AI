@@ -4,13 +4,18 @@ import csv
 import math
 import random 
 
+# The total depth of the game tree
+GAME_TREE_DEPTH = 3
+
+# Initialize the column exploration order, starting with center columns
+# COLUMN_ORDER = [0, 1, 2, 3, 4, 5, 6]     # without move ordering
+COLUMN_ORDER = [3, 2, 4, 1, 5, 0, 6]       # with move ordering
+
+
 CSV_FILE = "testcase.csv"
 
-# The total depth of the game tree
-GAME_TREE_DEPTH = 5
-
 # The maximum number of moves allowed for the game tree player
-MAX_ALLOWED_NUM_OF_MOVES = 5
+MAX_ALLOWED_NUM_OF_MOVES_TESTCASE = 5
 
 # Which player plays first, 0 - Myopic player starts, 1 - GameTree Player starts
 # FIRST_PLAYER = 1
@@ -29,10 +34,7 @@ COLUMN_COUNT = 7
 # The size of the window to evaluate
 WINDOW_LENGTH = 4
 
-# Initialize the column exploration order, starting with center columns
-# COLUMN_ORDER = [0, 1, 2, 3, 4, 5, 6]     # change
-COLUMN_ORDER = [3, 2, 4, 1, 5, 0, 6]
-    
+
 class GameTreePlayer:
     
     def __init__(self):
@@ -53,7 +55,7 @@ class GameTreePlayer:
                 return r
     
     # Checks if move will be a winning move
-    def winning_move(self, board, piece):
+    def isWinningMove(self, board, piece):
         # Check horizontal locations for win
         for c in range(COLUMN_COUNT-3):
             for r in range(ROW_COUNT):
@@ -97,11 +99,6 @@ class GameTreePlayer:
             
         if window.count(opp_piece) == 3 and window.count(EMPTY) == 1:
             score -= 4
-        # elif window.count(opp_piece) == 4:
-        #     score -= 100
-
-        # elif window.count(opp_piece) == 2 and window.count(EMPTY) == 2:
-        #     score -= 10
 
         return score
     
@@ -142,43 +139,29 @@ class GameTreePlayer:
     
 
     # Get all the valid locations where a piece can be inserted
-    def getValidLocations(self, board):
-        valid_locations = []
+    def getValidColumns(self, board):
+        valid_columns = []
         # Move ordering heuristic
         for col in COLUMN_ORDER:
             if self.isValidColumn(board, col):
-                valid_locations.append(col)
-        return valid_locations
+                valid_columns.append(col)
+        return valid_columns
     
     # Checks if the game has reached a terminal state
     def isTerminalNode(self, board):
-        return self.winning_move(board, MYOPIC_PIECE) or self.winning_move(board, GAMETREE_PIECE) or len(self.getValidLocations(board)) == 0
-    
-    # def myopicPlayerActionWrapper(self, board):
-    #     tempBoard = FourConnect()
-    #     tempBoard.SetCurrentState(board)
-        
-    #     # Redirecting output so it doesn't print anything
-    #     old_stdout = sys.stdout # backup current stdout
-    #     sys.stdout = open(os.devnull, "w")
-        
-    #     tempBoard.MyopicPlayerAction()
-        
-    #     sys.stdout = old_stdout # reset old stdout
-    
-    #     return tempBoard.GetCurrentState()
+        return self.isWinningMove(board, MYOPIC_PIECE) or self.isWinningMove(board, GAMETREE_PIECE) or len(self.getValidColumns(board)) == 0
     
     # Minimax Algorithm in alpha-beta pruning
     def minimax(self, board, depth, alpha, beta, maximizingPlayer):
-        valid_locations = self.getValidLocations(board)
+        valid_columns = self.getValidColumns(board)
         is_terminal = self.isTerminalNode(board)
         
         
         if depth == 0 or is_terminal:
             if is_terminal:
-                if self.winning_move(board, GAMETREE_PIECE):
+                if self.isWinningMove(board, GAMETREE_PIECE):
                     return (None, 100000000000000)
-                elif self.winning_move(board, MYOPIC_PIECE):
+                elif self.isWinningMove(board, MYOPIC_PIECE):
                     return (None, -10000000000000)
                 else:
                     return (None, 0)
@@ -188,7 +171,7 @@ class GameTreePlayer:
         if maximizingPlayer:
             value = -math.inf
             best_column = None  # Initialize to None
-            for col in valid_locations:
+            for col in valid_columns:
                 row = self.getNextOpenRow(board, col)
                 if row is not None:  # Check if the row is not None
                     b_copy = copy.deepcopy(board)         
@@ -203,13 +186,13 @@ class GameTreePlayer:
                         break
 
             if best_column is None:
-                best_column = random.choice(valid_locations)  # Handle the case when no valid columns are found
+                best_column = random.choice(valid_columns)  # Handle the case when no valid columns are found
 
             return best_column, value
         else:  # Minimizing player
             value = math.inf
             best_column = None  # Initialize to None
-            for col in valid_locations:
+            for col in valid_columns:
                 row = self.getNextOpenRow(board, col)
                 if row is not None:  # Check if the row is not None
                     b_copy = copy.deepcopy(board)      
@@ -224,7 +207,7 @@ class GameTreePlayer:
                         break
             
             if best_column is None:
-                best_column = random.choice(valid_locations)  # Handle the case when no valid columns are found
+                best_column = random.choice(valid_columns)  # Handle the case when no valid columns are found
 
             return best_column, value
 
@@ -245,7 +228,10 @@ class GameTreePlayer:
         
         col = 0
         col, _ = self.minimax(currentState, GAME_TREE_DEPTH, -math.inf, math.inf, True)
-        return col
+        
+        if col is None:
+            col = random.randint(0, 6)
+        return col 
         
     
 
@@ -301,7 +287,7 @@ def RunTestCase():
     fourConnect.PrintGameState()
 
     move=0
-    while move<MAX_ALLOWED_NUM_OF_MOVES: #Player 2 must win in allowed number of moves
+    while move<MAX_ALLOWED_NUM_OF_MOVES_TESTCASE: #Player 2 must win in allowed number of moves
         if move%2 == 1: # Assumed that myopic player already made first move 
             fourConnect.MyopicPlayerAction()
         else:
@@ -318,13 +304,13 @@ def RunTestCase():
     if fourConnect.winner==2:
         print("Player 2 has won. Testcase passed.")
     else:
-        print(f"Player 2 could not win in {MAX_ALLOWED_NUM_OF_MOVES} moves. Testcase failed.")
+        print(f"Player 2 could not win in {MAX_ALLOWED_NUM_OF_MOVES_TESTCASE} moves. Testcase failed.")
     print("Moves : {0}".format(move))
     
 
 def main():
     
-    PlayGame()
+    # PlayGame()
     """
     You can modify PlayGame function for writing the report
     Modify the FindBestAction in GameTreePlayer class to implement Game tree search.
@@ -338,7 +324,7 @@ def main():
         See the code for RunTestCase() to understand what is expected.
     """
     
-    # RunTestCase()
+    RunTestCase()
 
 
 if __name__=='__main__':
