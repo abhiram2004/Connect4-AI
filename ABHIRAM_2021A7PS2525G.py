@@ -3,13 +3,11 @@ from FourConnect import * # See the FourConnect.py file
 import csv
 import math
 import random 
-# import os, sys
-
 
 CSV_FILE = "testcase.csv"
 
 # The total depth of the game tree
-GAME_TREE_DEPTH = 6
+GAME_TREE_DEPTH = 5
 
 # The maximum number of moves allowed for the game tree player
 MAX_ALLOWED_NUM_OF_MOVES = 5
@@ -32,11 +30,8 @@ COLUMN_COUNT = 7
 WINDOW_LENGTH = 4
 
 # Initialize the column exploration order, starting with center columns
-COLUMN_ORDER = list(range(COLUMN_COUNT))
-for i in range(COLUMN_COUNT):
-    # Initialize the column exploration order, starting with center columns
-    COLUMN_ORDER[i] = COLUMN_COUNT//2 + (1 - 2*(i%2))*(i+1)//2
-    
+# COLUMN_ORDER = [0, 1, 2, 3, 4, 5, 6]     # change
+COLUMN_ORDER = [3, 2, 4, 1, 5, 0, 6]
     
 class GameTreePlayer:
     
@@ -227,14 +222,6 @@ class GameTreePlayer:
                     beta = min(beta, value)
                     if alpha >= beta:
                         break
-            
-            
-            # b_copy = self.myopicPlayerActionWrapper(board)  
-            # _, new_score = self.minimax(b_copy, depth - 1, alpha, beta, True)
-            # if new_score < value:
-            #     value = new_score
-                
-            # beta = min(beta, value)
             
             if best_column is None:
                 best_column = random.choice(valid_locations)  # Handle the case when no valid columns are found
