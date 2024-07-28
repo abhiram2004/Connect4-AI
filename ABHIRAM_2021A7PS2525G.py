@@ -14,7 +14,7 @@ COLUMN_ORDER = [3, 2, 4, 1, 5, 0, 6]       # with move ordering
 CSV_FILE = "testcase.csv"
 
 # The maximum number of moves allowed for the game tree player
-MAX_ALLOWED_NUM_OF_MOVES_TESTCASE = 5
+MAX_ALLOWED_NUM_OF_MOVES_TESTCASE = 42
 
 "Constants used in file, do not change these values"
 
